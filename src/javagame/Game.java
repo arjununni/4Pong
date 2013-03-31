@@ -3,9 +3,12 @@ package javagame;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.*;
 import java.util.Random;
+import org.newdawn.slick.UnicodeFont;
+import org.newdawn.slick.font.effects.ColorEffect;
 
-public class Game extends BasicGame{
+class Game extends BasicGame{
 	
+	private org.newdawn.slick.Font scoreFont;
 	Color c;
 	Random rand = new Random();
 	static int height = 480;
@@ -28,6 +31,7 @@ public class Game extends BasicGame{
 	int pc1;
 	int pc2;
 	int pc3;
+	int rno;
 	int r;
 	int gr;
 	int b;
@@ -44,9 +48,22 @@ public class Game extends BasicGame{
 		cpu2 = new RoundedRectangle(width /2, height - 15, 80, 10, 3);
 		cpu3 = new RoundedRectangle(width /2, 10, 80, 10, 3);
 		ball = new Circle(width /2, height/2, 6);
-		ballVelocity = new Vector2f(-3,1);
+		ballVelocity = new Vector2f(-3, 1);
+		this.scoreFont = createFont("Arial", 50);
 	}
 	
+	private Font createFont(String string, int size){
+		UnicodeFont font = new UnicodeFont(new java.awt.Font(string, 0, size), size, false, false);
+		font.getEffects().add(new ColorEffect());
+		font.addGlyphs("0123456789");
+		try {
+			font.loadGlyphs();
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
+		return font;
+	}
+
 	public void update(GameContainer gc, int delta){
 		
 		if(gc.getInput().isKeyDown(Input.KEY_UP)){
@@ -62,6 +79,7 @@ public class Game extends BasicGame{
 		if(ball.intersects(paddlePlayer)){
 			ballVelocity.x = -ballVelocity.getX();
 			changecolor();
+			rno = rand.nextInt(100);
 		}
 		if(ball.intersects(cpu1)){
 			ballVelocity.x = -ballVelocity.getX();
@@ -69,6 +87,7 @@ public class Game extends BasicGame{
 			pc2 = 0;
 			pc3 = 0;
 			changecolor();
+			
 		}
 		if(ball.intersects(cpu2)){
 			ballVelocity.y = -ballVelocity.getY();
@@ -113,9 +132,18 @@ public class Game extends BasicGame{
 			scorePlayer++;
 			changecolor();
 		}
-
+		
+		
 		ypos = ball.getCenterY() - cpu1.getHeight() /2 ;
-		xpos = ball.getCenterX() - cpu2.getWidth() /2;
+		xpos = ball.getCenterX() - cpu2.getWidth() /2 ;
+		
+		if(rno >= 75){
+			ypos -= 43;
+		}
+		
+		if(rno <= 75){
+			xpos -= 43;
+		}
 		
 		cpu1.setY(ypos);
 		if(ball.getY() > 240){
@@ -135,6 +163,10 @@ public class Game extends BasicGame{
 	}
 	
 	public void render(GameContainer gc, Graphics g){
+		
+		g.setColor(Color.gray);
+		g.fillRect(0.0F, 0.0F, width, height);
+		g.setColor(Color.white);
 		g.drawString("4Pong", 10, 25);
 		g.drawString("LooneyTunes, 31/3", 10, 40);
 		g.fill(paddlePlayer);
@@ -144,10 +176,11 @@ public class Game extends BasicGame{
 		g.fill(ball);
 		g.setColor(Color.white);
 		g.fill(cpu3);
-		g.drawString(Integer.toString(scoreCPU1), 500, height /2);
-		g.drawString(Integer.toString(scorePlayer), 100, height /2);
-		g.drawString(Integer.toString(scoreCPU2), width /2, 400);
-		g.drawString(Integer.toString(scoreCPU3),width/2, 100);
+		g.setFont(scoreFont);
+		g.drawString(Integer.toString(scoreCPU1), width/2+100, height /2);
+		g.drawString(Integer.toString(scorePlayer), width/2-100, height /2);
+		g.drawString(Integer.toString(scoreCPU2), width /2, height/2 + 100);
+		g.drawString(Integer.toString(scoreCPU3),width/2, height/2 - 100);
 	}
 	
 	public static void main(String[] args) throws SlickException{
